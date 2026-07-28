@@ -113,7 +113,6 @@ export default function PortfolioSection() {
 
     return () => {
       tl.kill();
-      ScrollTrigger.getAll().forEach(t => t.kill());
     };
   }, [projects.length]);
 

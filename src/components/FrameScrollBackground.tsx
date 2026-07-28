@@ -131,7 +131,7 @@ export default function FrameScrollBackground({ onLoadComplete }: FrameScrollBac
       frame: totalFrames - 1,
       ease: "none",
       scrollTrigger: {
-        trigger: "#hero-section",
+        trigger: "html",
         start: "top top",
         end: () => `+=${window.innerHeight * 3.5}`, // scrub animation over 3.5 viewports
         scrub: 0.2, // fine scrubbing for smoothness
@@ -146,7 +146,7 @@ export default function FrameScrollBackground({ onLoadComplete }: FrameScrollBac
       opacity: 0,
       ease: "none",
       scrollTrigger: {
-        trigger: "#hero-section",
+        trigger: "html",
         start: () => `+=${window.innerHeight * 3.0}`, // start fading at 3.0 viewport height
         end: () => `+=${window.innerHeight * 3.5}`,   // fully faded out at 3.5 height
         scrub: true,
@@ -157,7 +157,6 @@ export default function FrameScrollBackground({ onLoadComplete }: FrameScrollBac
       window.removeEventListener("resize", resizeCanvas);
       tl.kill();
       fadeTl.kill();
-      ScrollTrigger.getAll().forEach(t => t.kill());
     };
   }, [onLoadComplete]);
 
