@@ -2,15 +2,13 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
 
 interface FrameScrollBackgroundProps {
   onLoadComplete?: () => void;
+  drawFrameRef?: React.MutableRefObject<((frame: number) => void) | null>;
 }
 
-export default function FrameScrollBackground({ onLoadComplete }: FrameScrollBackgroundProps) {
+export default function FrameScrollBackground({ onLoadComplete, drawFrameRef }: FrameScrollBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const [loadProgress, setLoadProgress] = useState(0);
@@ -21,8 +19,16 @@ export default function FrameScrollBackground({ onLoadComplete }: FrameScrollBac
   const frameWidth = 848;
   const frameHeight = 478;
 
-  // Track scroll animation frame
-  const animationFrameRef = useRef<{ frame: number }>({ frame: 0 });
+  // Fade in smoothly when loading completes
+  useEffect(() => {
+    if (isLoaded && scrollContainerRef.current) {
+      gsap.fromTo(
+        scrollContainerRef.current,
+        { opacity: 0 },
+        { opacity: 1, duration: 0.8, ease: "power2.out" }
+      );
+    }
+  }, [isLoaded]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -31,17 +37,6 @@ export default function FrameScrollBackground({ onLoadComplete }: FrameScrollBac
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-
-    // Handle canvas resizing
-    const resizeCanvas = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      drawActiveFrame(animationFrameRef.current.frame);
-    };
-
-    window.addEventListener("resize", resizeCanvas);
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
 
     // Cover drawing algorithm
     const drawActiveFrame = (index: number) => {
@@ -70,8 +65,26 @@ export default function FrameScrollBackground({ onLoadComplete }: FrameScrollBac
 
       ctx.clearRect(0, 0, canvasWidth, canvasHeight);
       ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
-      lastDrawnFrameRef.current = index;
+      lastDrawnFrameRef.current = roundedIndex;
     };
+
+    // Handle canvas resizing
+    const resizeCanvas = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const lastFrame = lastDrawnFrameRef.current;
+      lastDrawnFrameRef.current = -1; // Force redraw
+      drawActiveFrame(lastFrame >= 0 ? lastFrame : 0);
+    };
+
+    window.addEventListener("resize", resizeCanvas);
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    // Assign drawing callback to parent ref so it can control it directly
+    if (drawFrameRef) {
+      drawFrameRef.current = drawActiveFrame;
+    }
 
     // Preload frames in background
     let loadedCount = 0;
@@ -125,50 +138,13 @@ export default function FrameScrollBackground({ onLoadComplete }: FrameScrollBac
       }
     };
 
-    // Bind GSAP ScrollTrigger to scrub through frames ONLY in the Hero zone (3.5 viewports)
-    const scrollObj = animationFrameRef.current;
-    const tl = gsap.to(scrollObj, {
-      frame: totalFrames - 1,
-      ease: "none",
-      scrollTrigger: {
-        trigger: "html",
-        start: "top top",
-        end: () => `+=${window.innerHeight * 3.5}`, // scrub animation over 3.5 viewports
-        scrub: 0.2, // fine scrubbing for smoothness
-        onUpdate: () => {
-          drawActiveFrame(scrollObj.frame);
-        },
-      },
-    });
-
-    // Fade out the entire background container as user scrolls past the Hero zone
-    const fadeTl = gsap.to(container, {
-      opacity: 0,
-      ease: "none",
-      scrollTrigger: {
-        trigger: "html",
-        start: () => `+=${window.innerHeight * 3.0}`, // start fading at 3.0 viewport height
-        end: () => `+=${window.innerHeight * 3.5}`,   // fully faded out at 3.5 height
-        scrub: true,
-      },
-    });
-
     return () => {
       window.removeEventListener("resize", resizeCanvas);
-      tl.kill();
-      fadeTl.kill();
+      if (drawFrameRef) {
+        drawFrameRef.current = null;
+      }
     };
-  }, [onLoadComplete]);
-
-  // Recalculate ScrollTrigger markers after the loading overlay hides
-  useEffect(() => {
-    if (isLoaded) {
-      const timer = setTimeout(() => {
-        ScrollTrigger.refresh();
-      }, 150);
-      return () => clearTimeout(timer);
-    }
-  }, [isLoaded]);
+  }, [onLoadComplete, drawFrameRef]);
 
   return (
     <>
@@ -220,9 +196,10 @@ export default function FrameScrollBackground({ onLoadComplete }: FrameScrollBac
 
       {/* Scroll Background Wrapper */}
       <div 
+        id="scroll-bg-container"
         ref={scrollContainerRef}
-        className="absolute inset-0 pointer-events-none transition-opacity duration-500"
-        style={{ opacity: isLoaded ? 1 : 0, zIndex: 0 }}
+        className="absolute inset-0 pointer-events-none"
+        style={{ opacity: 0, zIndex: 0 }}
       >
         {/* Canvas Video Frames Background */}
         <canvas

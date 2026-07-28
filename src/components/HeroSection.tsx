@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import gsap from "gsap";
@@ -10,6 +10,8 @@ import FrameScrollBackground from "./FrameScrollBackground";
 gsap.registerPlugin(ScrollTrigger);
 
 export default function HeroSection() {
+  const drawFrameRef = useRef<((frame: number) => void) | null>(null);
+
   const scrollToContact = () => {
     const contactSection = document.getElementById("contact");
     if (contactSection) {
@@ -25,53 +27,67 @@ export default function HeroSection() {
   };
 
   useEffect(() => {
-    // Pin the hero section during the 3D scroll sequence (matching background duration)
-    const pin = ScrollTrigger.create({
-      trigger: "#hero-section",
-      start: "top top",
-      end: () => `+=${window.innerHeight * 3.5}`,
-      pin: true,
-      pinSpacing: true,
-    });
+    const scrollObj = { frame: 0 };
+    const totalFrames = 240;
 
-    // Fade out and transform individual elements on scroll in a staggered, cinematic fashion
+    // Create a unified timeline that pins the section and scrubs all animations in sync
     const tl = gsap.timeline({
       scrollTrigger: {
-        trigger: "html",
+        trigger: "#hero-section",
         start: "top top",
-        end: () => `+=${window.innerHeight * 3.0}`, // fully faded out before unpinning
-        scrub: true,
+        end: () => `+=${window.innerHeight * 3.5}`,
+        pin: true,
+        pinSpacing: true,
+        scrub: 0.2, // scrub everything smoothly
       },
     });
 
+    // 1. Scrub the 3D canvas frames over the entire pin duration
+    tl.to(scrollObj, {
+      frame: totalFrames - 1,
+      ease: "none",
+      onUpdate: () => {
+        if (drawFrameRef.current) {
+          drawFrameRef.current(scrollObj.frame);
+        }
+      },
+      duration: 3.5, // relative timeline duration
+    }, 0);
+
+    // 2. Fade out text overlays in a staggered fashion
     tl.to("#hero-badge, #scroll-indicator", {
       opacity: 0,
       y: -30,
-      duration: 0.4,
+      duration: 0.5,
     }, 0);
 
     tl.to("#hero-desc, #hero-tagline", {
       opacity: 0,
       y: -40,
-      duration: 0.5,
-    }, 0.2);
+      duration: 0.7,
+    }, 0.5);
 
     tl.to("#hero-buttons", {
       opacity: 0,
       y: -50,
       scale: 0.95,
-      duration: 0.5,
-    }, 0.4);
+      duration: 0.7,
+    }, 1.0);
 
     tl.to("#hero-title", {
       opacity: 0,
       scale: 1.15,
       y: -80,
-      duration: 0.8,
-    }, 0.6);
+      duration: 1.0,
+    }, 1.5);
+
+    // 3. Fade out the background canvas wrapper at the very end
+    tl.to("#scroll-bg-container", {
+      opacity: 0,
+      duration: 0.5,
+    }, 3.0); // start fade-out at progress 3.0 out of 3.5
 
     return () => {
-      pin.kill();
       tl.kill();
     };
   }, []);
@@ -79,7 +95,7 @@ export default function HeroSection() {
   return (
     <section id="hero-section" className="relative min-h-screen w-full flex flex-col justify-between items-center px-6 py-12 md:py-24 overflow-hidden">
       {/* Cinematic 3D Scroll Canvas Background */}
-      <FrameScrollBackground />
+      <FrameScrollBackground drawFrameRef={drawFrameRef} />
 
       {/* Spacer to push content down slightly for R3F monogram center alignment */}
       <div />
