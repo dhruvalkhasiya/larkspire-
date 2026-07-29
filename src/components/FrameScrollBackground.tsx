@@ -6,9 +6,11 @@ import gsap from "gsap";
 interface FrameScrollBackgroundProps {
   onLoadComplete?: () => void;
   drawFrameRef?: React.MutableRefObject<((frame: number) => void) | null>;
+  framesPath?: string;
+  containerId?: string;
 }
 
-export default function FrameScrollBackground({ onLoadComplete, drawFrameRef }: FrameScrollBackgroundProps) {
+export default function FrameScrollBackground({ onLoadComplete, drawFrameRef, framesPath = "/frames", containerId = "scroll-bg-container" }: FrameScrollBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const [loadProgress, setLoadProgress] = useState(0);
@@ -92,7 +94,7 @@ export default function FrameScrollBackground({ onLoadComplete, drawFrameRef }: 
 
     // Load first frame immediately as a poster
     const posterImg = new Image();
-    posterImg.src = `/frames/frame_00000.jpg`;
+    posterImg.src = `${framesPath}/frame_00000.jpg`;
     posterImg.onload = () => {
       images[0] = posterImg;
       imagesRef.current[0] = posterImg;
@@ -102,7 +104,7 @@ export default function FrameScrollBackground({ onLoadComplete, drawFrameRef }: 
       loadRemainingFrames();
     };
     posterImg.onerror = () => {
-      console.error("Failed to load poster frame 0.");
+      console.error(`Failed to load poster frame 0 from ${framesPath}.`);
       loadRemainingFrames();
     };
 
@@ -124,7 +126,7 @@ export default function FrameScrollBackground({ onLoadComplete, drawFrameRef }: 
         if (i === 0) continue; // already loaded poster
         
         const img = new Image();
-        img.src = `/frames/frame_${String(i).padStart(5, "0")}.jpg`;
+        img.src = `${framesPath}/frame_${String(i).padStart(5, "0")}.jpg`;
         
         img.onload = () => {
           images[i] = img;
@@ -196,7 +198,7 @@ export default function FrameScrollBackground({ onLoadComplete, drawFrameRef }: 
 
       {/* Scroll Background Wrapper */}
       <div 
-        id="scroll-bg-container"
+        id={containerId}
         ref={scrollContainerRef}
         className="absolute inset-0 pointer-events-none"
         style={{ opacity: 0, zIndex: 0 }}

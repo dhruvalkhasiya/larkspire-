@@ -30,65 +30,67 @@ export default function HeroSection() {
     const scrollObj = { frame: 0 };
     const totalFrames = 240;
 
-    // Create a unified timeline that pins the section and scrubs all animations in sync
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: "#hero-section",
-        start: "top top",
-        end: () => `+=${window.innerHeight * 3.0}`, // scrub animation over 3.0 viewports
-        pin: true,
-        pinSpacing: true,
-        scrub: 0.2, // scrub everything smoothly
-      },
+    const ctx = gsap.context(() => {
+      // Create a unified timeline that pins the section and scrubs all animations in sync
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: "#hero-section",
+          start: "top top",
+          end: () => `+=${window.innerHeight * 3.0}`, // scrub animation over 3.0 viewports
+          pin: true,
+          pinSpacing: true,
+          scrub: 0.2, // scrub everything smoothly
+        },
+      });
+
+      // 1. Scrub the 3D canvas frames over the entire pin duration
+      tl.to(scrollObj, {
+        frame: totalFrames - 1,
+        ease: "none",
+        onUpdate: () => {
+          if (drawFrameRef.current) {
+            drawFrameRef.current(scrollObj.frame);
+          }
+        },
+        duration: 3.0, // relative timeline duration
+      }, 0);
+
+      // 2. Fade out text overlays in a staggered fashion, stretched to cover the entire duration
+      tl.to("#hero-badge, #scroll-indicator", {
+        opacity: 0,
+        y: -30,
+        duration: 0.7,
+      }, 0);
+
+      tl.to("#hero-desc, #hero-tagline", {
+        opacity: 0,
+        y: -40,
+        duration: 0.9,
+      }, 0.7);
+
+      tl.to("#hero-buttons", {
+        opacity: 0,
+        y: -50,
+        scale: 0.95,
+        duration: 0.9,
+      }, 1.4);
+
+      tl.to("#hero-title", {
+        opacity: 0,
+        scale: 1.15,
+        y: -80,
+        duration: 1.0,
+      }, 2.0); // finishes exactly at 3.0
+
+      // 3. Fade out the background canvas wrapper at the very end of the pin
+      tl.to("#scroll-bg-container", {
+        opacity: 0,
+        duration: 0.5,
+      }, 2.5); // starts at 2.5, finishes exactly at 3.0
     });
 
-    // 1. Scrub the 3D canvas frames over the entire pin duration
-    tl.to(scrollObj, {
-      frame: totalFrames - 1,
-      ease: "none",
-      onUpdate: () => {
-        if (drawFrameRef.current) {
-          drawFrameRef.current(scrollObj.frame);
-        }
-      },
-      duration: 3.0, // relative timeline duration
-    }, 0);
-
-    // 2. Fade out text overlays in a staggered fashion, stretched to cover the entire duration
-    tl.to("#hero-badge, #scroll-indicator", {
-      opacity: 0,
-      y: -30,
-      duration: 0.7,
-    }, 0);
-
-    tl.to("#hero-desc, #hero-tagline", {
-      opacity: 0,
-      y: -40,
-      duration: 0.9,
-    }, 0.7);
-
-    tl.to("#hero-buttons", {
-      opacity: 0,
-      y: -50,
-      scale: 0.95,
-      duration: 0.9,
-    }, 1.4);
-
-    tl.to("#hero-title", {
-      opacity: 0,
-      scale: 1.15,
-      y: -80,
-      duration: 1.0,
-    }, 2.0); // finishes exactly at 3.0
-
-    // 3. Fade out the background canvas wrapper at the very end of the pin
-    tl.to("#scroll-bg-container", {
-      opacity: 0,
-      duration: 0.5,
-    }, 2.5); // starts at 2.5, finishes exactly at 3.0
-
     return () => {
-      tl.kill();
+      ctx.revert();
     };
   }, []);
 

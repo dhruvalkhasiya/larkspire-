@@ -9,6 +9,7 @@ import HeroSection from "@/components/HeroSection";
 import AboutSection from "@/components/AboutSection";
 import ServicesSection from "@/components/ServicesSection";
 import PortfolioSection from "@/components/PortfolioSection";
+import ClassroomCaseStudy from "@/components/ClassroomCaseStudy";
 import StatsSection from "@/components/StatsSection";
 import ProcessSection from "@/components/ProcessSection";
 import WhyGrid from "@/components/WhyGrid";
@@ -44,6 +45,9 @@ export default function Home() {
 
         {/* Selected Work 3D Corridor walkthrough */}
         <PortfolioSection />
+
+        {/* Featured Case Study: AI Classroom */}
+        <ClassroomCaseStudy />
 
         {/* Dials & Gauges performance benchmarks */}
         <StatsSection />
