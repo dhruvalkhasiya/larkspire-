@@ -13,6 +13,7 @@ interface Project {
   description: string;
   tags: string[];
   year: string;
+  image: string;
 }
 
 export default function PortfolioSection() {
@@ -37,6 +38,7 @@ export default function PortfolioSection() {
       description: "A digital flagstore featuring high-resolution interactive fabric shaders and fluid scrolling choreography.",
       tags: ["Next.js", "Three.js", "Tailwind CSS"],
       year: "2026",
+      image: "/gallery/project_1.jpg",
     },
     {
       title: "Noir & Sel",
@@ -44,6 +46,7 @@ export default function PortfolioSection() {
       description: "An experiential reservation portal with interactive table layouts and rich micro-transitions.",
       tags: ["Next.js", "Framer Motion", "Tailwind"],
       year: "2025",
+      image: "/gallery/project_2.jpg",
     },
     {
       title: "Ironframe Club",
@@ -51,6 +54,7 @@ export default function PortfolioSection() {
       description: "A dark-themed fitness dashboard showcasing immersive video integration and performance tracking.",
       tags: ["GSAP", "React", "CSS Modules"],
       year: "2025",
+      image: "/gallery/project_3.jpg",
     },
     {
       title: "Vanguard Studio",
@@ -58,6 +62,7 @@ export default function PortfolioSection() {
       description: "An interactive portfolio rendering 3D isometric models of architectural projects with smooth camera paths.",
       tags: ["R3F", "WebGL", "TypeScript"],
       year: "2026",
+      image: "/gallery/project_4.jpg",
     },
   ];
 
@@ -165,57 +170,69 @@ export default function PortfolioSection() {
             return (
               <div
                 key={idx}
-                className={`project-card absolute w-[290px] sm:w-[480px] p-6 sm:p-10 glass-panel rounded-custom flex flex-col justify-between h-[360px] sm:h-[400px] border border-white/5 pointer-events-auto transition-shadow duration-500 ${
+                className={`project-card absolute w-[290px] sm:w-[480px] p-6 sm:p-10 glass-panel rounded-custom overflow-hidden group flex flex-col justify-between h-[360px] sm:h-[400px] border border-white/5 pointer-events-auto transition-all duration-500 ${
                   isFocus 
-                    ? "border-gold/40 shadow-[0_0_40px_rgba(212,175,55,0.2)]" 
+                    ? "border-gold/40 shadow-[0_0_40px_rgba(212,175,55,0.25)]" 
                     : ""
                 }`}
                 style={{
                   transformStyle: "preserve-3d",
                 }}
               >
-                {/* Upper Details */}
-                <div className="space-y-4">
-                  <div className="flex justify-between items-start">
-                    <span className="text-xs font-mono text-gold tracking-widest">
-                      0{idx + 1} // CASE
-                    </span>
-                    <span className="text-xs font-mono text-text-muted">
-                      {project.year}
-                    </span>
-                  </div>
+                {/* Background image layer with zoom effect */}
+                <div 
+                  className="absolute inset-0 z-0 bg-cover bg-center transition-transform duration-700 ease-out group-hover:scale-110 pointer-events-none"
+                  style={{ backgroundImage: `url(${project.image})` }}
+                />
+                
+                {/* Dark Vignette Mask overlay */}
+                <div className="absolute inset-0 z-0 bg-gradient-to-b from-black/70 via-black/85 to-[#0b0b0b] group-hover:from-black/55 group-hover:via-black/75 group-hover:to-[#070707] transition-all duration-500 pointer-events-none" />
 
-                  <div className="space-y-1">
-                    <h4 className="font-display text-xs text-text-muted tracking-[0.2em] uppercase font-light">
-                      {project.category}
-                    </h4>
-                    <h5 className="font-display text-2xl sm:text-3xl tracking-wider text-gold-light uppercase font-bold">
-                      {project.title}
-                    </h5>
-                  </div>
-
-                  <p className="text-xs sm:text-sm text-text-muted leading-relaxed font-light">
-                    {project.description}
-                  </p>
-                </div>
-
-                {/* Lower Action & Badges */}
-                <div className="space-y-6 pt-4 border-t border-white/5">
-                  <div className="flex flex-wrap gap-2">
-                    {project.tags.map((tag, tIdx) => (
-                      <span
-                        key={tIdx}
-                        className="px-2 py-0.5 border border-gold/20 text-[9px] font-mono text-gold-light uppercase rounded-sm"
-                      >
-                        {tag}
+                {/* Card Content container */}
+                <div className="relative z-10 flex flex-col justify-between h-full w-full">
+                  {/* Upper Details */}
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-start">
+                      <span className="text-xs font-mono text-gold tracking-widest">
+                        0{idx + 1} // CASE
                       </span>
-                    ))}
+                      <span className="text-xs font-mono text-text-muted">
+                        {project.year}
+                      </span>
+                    </div>
+
+                    <div className="space-y-1">
+                      <h4 className="font-display text-xs text-text-muted tracking-[0.2em] uppercase font-light">
+                        {project.category}
+                      </h4>
+                      <h5 className="font-display text-2xl sm:text-3xl tracking-wider text-gold-light uppercase font-bold">
+                        {project.title}
+                      </h5>
+                    </div>
+
+                    <p className="text-xs sm:text-sm text-text-muted leading-relaxed font-light">
+                      {project.description}
+                    </p>
                   </div>
 
-                  <button className="flex items-center space-x-2 text-xs font-mono text-text-muted hover:text-gold-light transition-colors duration-300">
-                    <span>EXPLORE CASE STUDY</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </button>
+                  {/* Lower Action & Badges */}
+                  <div className="space-y-6 pt-4 border-t border-white/5">
+                    <div className="flex flex-wrap gap-2">
+                      {project.tags.map((tag, tIdx) => (
+                        <span
+                          key={tIdx}
+                          className="px-2 py-0.5 border border-gold/20 text-[9px] font-mono text-gold-light uppercase rounded-sm bg-black/30 backdrop-blur-sm"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+
+                    <button className="flex items-center space-x-2 text-xs font-mono text-text-muted hover:text-gold-light transition-colors duration-300">
+                      <span>EXPLORE CASE STUDY</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
               </div>
             );
