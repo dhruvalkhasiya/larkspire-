@@ -91,7 +91,7 @@ export default function ClassroomCaseStudy() {
   return (
     <section id="classroom-section" className="relative min-h-screen w-full flex flex-col justify-between items-center px-6 py-12 md:py-24 overflow-hidden bg-bg">
       {/* Cinematic 3D Scroll Canvas Background (Exposing callback ref and custom framesPath) */}
-      <FrameScrollBackground drawFrameRef={drawFrameRef} framesPath="/classroom" />
+      <FrameScrollBackground drawFrameRef={drawFrameRef} framesPath="/classroom" containerId="scroll-bg-container-classroom" />
 
       {/* Spacer to push content down slightly */}
       <div className="absolute inset-0 pointer-events-none z-0 bg-gradient-to-b from-[#050505] via-transparent to-[#050505] opacity-80" />
