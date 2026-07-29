@@ -19,6 +19,16 @@ export default function PortfolioSection() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const scrollTrackRef = useRef<HTMLDivElement | null>(null);
   const [activeProject, setActiveProject] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   const projects: Project[] = [
     {
@@ -77,10 +87,12 @@ export default function PortfolioSection() {
       },
     });
 
-    // Move each card forward from -2000px depth to 400px (passing the camera)
+    const isMob = window.innerWidth < 768;
+
+    // Move each card forward from depth (mobile has compressed coordinates to fit screens)
     cards.forEach((card, idx) => {
-      const startZ = -2500 - idx * 1200; // stagger original depth
-      const endZ = 600;
+      const startZ = (isMob ? -1600 : -2500) - idx * (isMob ? 850 : 1200);
+      const endZ = isMob ? 250 : 600;
 
       // Animate card translation along Z axis
       tl.fromTo(
@@ -95,10 +107,17 @@ export default function PortfolioSection() {
           opacity: (progress) => {
             // Fade in as it approaches focus, fade out as it goes past camera
             const cardZ = startZ + (endZ - startZ) * tl.progress();
-            if (cardZ < -1500) return 0;
-            if (cardZ >= -1500 && cardZ <= -200) return (cardZ + 1500) / 1300; // fade in
-            if (cardZ > -200 && cardZ <= 300) return 1; // full opacity in focus
-            return Math.max(0, 1 - (cardZ - 300) / 300); // fade out
+            if (isMob) {
+              if (cardZ < -1000) return 0;
+              if (cardZ >= -1000 && cardZ <= -200) return (cardZ + 1000) / 800; // fade in
+              if (cardZ > -200 && cardZ <= 80) return 1; // full opacity in focus
+              return Math.max(0, 1 - (cardZ - 80) / 170); // fade out early on mobile
+            } else {
+              if (cardZ < -1500) return 0;
+              if (cardZ >= -1500 && cardZ <= -200) return (cardZ + 1500) / 1300; // fade in
+              if (cardZ > -200 && cardZ <= 300) return 1; // full opacity in focus
+              return Math.max(0, 1 - (cardZ - 300) / 300); // fade out
+            }
           },
           filter: (progress) => {
             const cardZ = startZ + (endZ - startZ) * tl.progress();

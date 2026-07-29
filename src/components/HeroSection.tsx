@@ -159,18 +159,18 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 1 }}
-          className="flex flex-col sm:flex-row justify-center items-center gap-4 pt-4"
+          className="flex justify-center items-center gap-3 pt-2"
         >
           <button
             onClick={scrollToContact}
-            className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-gold-dark via-gold-light to-gold-accent hover:brightness-110 text-bg font-semibold text-xs tracking-[0.25em] uppercase rounded-custom transition-all duration-300 shadow-[0_0_20px_rgba(212,175,55,0.15)] hover:shadow-[0_0_25px_rgba(212,175,55,0.3)] hover:-translate-y-0.5"
+            className="px-5 py-3 bg-gradient-to-r from-gold-dark via-gold-light to-gold-accent hover:brightness-110 text-bg font-bold text-[10px] sm:text-xs tracking-[0.15em] sm:tracking-[0.25em] uppercase rounded-custom transition-all duration-300 shadow-[0_0_20px_rgba(212,175,55,0.15)] hover:shadow-[0_0_25px_rgba(212,175,55,0.3)] hover:-translate-y-0.5"
           >
             Start a Project
           </button>
           
           <button
             onClick={scrollToWork}
-            className="w-full sm:w-auto px-8 py-3.5 border border-gold/30 hover:border-gold-light/80 hover:bg-gold/5 text-gold-light hover:text-white text-xs tracking-[0.25em] uppercase rounded-custom transition-all duration-300 backdrop-blur-sm"
+            className="px-5 py-3 border border-gold/30 hover:border-gold-light/80 hover:bg-gold/5 text-gold-light hover:text-white text-[10px] sm:text-xs tracking-[0.15em] sm:tracking-[0.25em] uppercase rounded-custom transition-all duration-300 backdrop-blur-sm"
           >
             View Our Work
           </button>

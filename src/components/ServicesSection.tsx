@@ -1,11 +1,21 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Palette, Code, Cpu, LineChart, ShieldCheck, Server, Settings } from "lucide-react";
 
 export default function ServicesSection() {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   const services = [
     {
@@ -61,7 +71,7 @@ export default function ServicesSection() {
   };
 
   return (
-    <section id="services" className="relative min-h-screen w-full flex flex-col justify-center items-center py-24 px-6 overflow-hidden z-10">
+    <section id="services" className="relative min-h-screen w-full flex flex-col justify-center items-center py-24 px-6 overflow-hidden z-10 bg-bg">
       <div className="max-w-6xl w-full space-y-16">
         
         {/* Section Heading */}
@@ -76,7 +86,7 @@ export default function ServicesSection() {
         </div>
 
         {/* 3D Depth Carousel Container */}
-        <div className="relative h-[480px] md:h-[420px] w-full flex items-center justify-center select-none" style={{ perspective: "1000px" }}>
+        <div className="relative h-[440px] md:h-[420px] w-full flex items-center justify-center select-none" style={{ perspective: "1000px" }}>
           {services.map((service, idx) => {
             const distance = idx - activeIndex;
             const isCenter = idx === activeIndex;
@@ -85,32 +95,38 @@ export default function ServicesSection() {
             // Limit visible cards in orbit to max 3 on each side
             if (absDistance > 2 && absDistance < services.length - 2) return null;
 
+            // Responsive spacings
+            const xSpacing = isMobile ? 180 : 320;
+            const zSpacing = isMobile ? 140 : 120;
+            const cardScale = isMobile ? (1 - absDistance * 0.2) : (1 - absDistance * 0.12);
+            const cardOpacity = isMobile ? (1 - absDistance * 0.55) : (1 - absDistance * 0.4);
+
             // Compute circular/orbit transform properties
-            let xOffset = distance * 320;
-            let zOffset = -absDistance * 120;
+            let xOffset = distance * xSpacing;
+            let zOffset = -absDistance * zSpacing;
             let rotationY = distance * -12;
-            let scale = 1 - absDistance * 0.12;
-            let opacity = 1 - absDistance * 0.4;
+            let scale = cardScale;
+            let opacity = cardOpacity;
             let zIndex = 100 - absDistance;
             let blur = absDistance * 2;
 
             // Handle wrap-around index offsets for circular scrolling
             if (distance < -services.length / 2) {
               const newDist = distance + services.length;
-              xOffset = newDist * 320;
-              zOffset = -Math.abs(newDist) * 120;
+              xOffset = newDist * xSpacing;
+              zOffset = -Math.abs(newDist) * zSpacing;
               rotationY = newDist * -12;
-              scale = 1 - Math.abs(newDist) * 0.12;
-              opacity = 1 - Math.abs(newDist) * 0.4;
+              scale = isMobile ? (1 - Math.abs(newDist) * 0.2) : (1 - Math.abs(newDist) * 0.12);
+              opacity = isMobile ? (1 - Math.abs(newDist) * 0.55) : (1 - Math.abs(newDist) * 0.4);
               zIndex = 100 - Math.abs(newDist);
               blur = Math.abs(newDist) * 2;
             } else if (distance > services.length / 2) {
               const newDist = distance - services.length;
-              xOffset = newDist * 320;
-              zOffset = -Math.abs(newDist) * 120;
+              xOffset = newDist * xSpacing;
+              zOffset = -Math.abs(newDist) * zSpacing;
               rotationY = newDist * -12;
-              scale = 1 - Math.abs(newDist) * 0.12;
-              opacity = 1 - Math.abs(newDist) * 0.4;
+              scale = isMobile ? (1 - Math.abs(newDist) * 0.2) : (1 - Math.abs(newDist) * 0.12);
+              opacity = isMobile ? (1 - Math.abs(newDist) * 0.55) : (1 - Math.abs(newDist) * 0.4);
               zIndex = 100 - Math.abs(newDist);
               blur = Math.abs(newDist) * 2;
             }
@@ -122,6 +138,8 @@ export default function ServicesSection() {
                 style={{
                   zIndex,
                   transformStyle: "preserve-3d",
+                  width: isMobile ? "250px" : "360px",
+                  height: isMobile ? "380px" : "360px",
                 }}
                 animate={{
                   x: xOffset,
@@ -132,7 +150,7 @@ export default function ServicesSection() {
                   filter: `blur(${blur}px)`,
                 }}
                 transition={{ duration: 0.6, ease: "easeInOut" }}
-                className={`absolute w-[300px] md:w-[360px] p-8 glass-panel rounded-custom flex flex-col justify-between space-y-6 h-[400px] md:h-[360px] cursor-pointer ${
+                className={`absolute p-6 md:p-8 glass-panel rounded-custom flex flex-col justify-between space-y-6 cursor-pointer ${
                   isCenter ? "border-gold/40 shadow-[0_0_30px_rgba(212,175,55,0.15)]" : "border-white/5 opacity-50"
                 }`}
               >
